@@ -173,30 +173,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('timer-start');
     const pauseBtn = document.getElementById('timer-pause');
     const resetBtn = document.getElementById('timer-reset');
+    const testSoundBtn = document.getElementById('timer-test-sound');
     const typeBtns = document.querySelectorAll('.timer-type');
 
-    // Function to play a notification sound
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+
+    // Function to show browser notification
+    const showNotification = (message) => {
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("Study Timer", {
+                body: message,
+                icon: "https://ucsc.cmb.ac.lk/new-site/wp-content/themes/university/images/ucsc-logo.png"
+            });
+        }
+    };
+
+    // Function to play a metallic bell-like notification sound
     const playNotificationSound = () => {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+            
+            const playTone = (freq, vol, duration, type = 'sine') => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            };
 
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.1);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
-
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 1);
+            // Bell-like harmonic structure (tubular bell style)
+            playTone(440, 0.4, 3, 'sine');    // Fundamental A4
+            playTone(880, 0.2, 2, 'sine');    // A5
+            playTone(1320, 0.15, 1.5, 'sine'); // E6
+            playTone(1760, 0.1, 1, 'sine');    // A6
+            playTone(2093, 0.05, 0.8, 'sine'); // C7
+            
+            // Initial "strike" component
+            playTone(440, 0.1, 0.05, 'square'); 
         } catch (e) {
-            console.log("Audio not supported or blocked");
+            console.warn("Audio context failed. Ensure you have interacted with the page.", e);
         }
     };
+
+    testSoundBtn.addEventListener('click', playNotificationSound);
 
     const updateDisplay = () => {
         const minutes = Math.floor(timeLeft / 60);
@@ -219,8 +246,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(timerInterval);
                 isRunning = false;
                 startBtn.disabled = false;
+                
+                const activeBtn = document.querySelector('.timer-type.active');
+                const modeName = activeBtn ? activeBtn.textContent.split(' (')[0] : "Session";
+                const message = `${modeName} complete! Time for a change.`;
+                
                 playNotificationSound();
-                alert("Time's up! Take a break.");
+                showNotification(message);
+                
+                setTimeout(() => {
+                    alert(message);
+                }, 100);
             }
         }, 1000);
     };
