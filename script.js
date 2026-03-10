@@ -34,14 +34,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerSection = document.getElementById('timer-section');
 
     const switchTab = (tab) => {
+        const sections = [gpaSection, timerSection];
+        sections.forEach(s => {
+            s.classList.add('hidden');
+            s.classList.remove('fade-in');
+        });
+
         if (tab === 'gpa') {
             gpaSection.classList.remove('hidden');
-            timerSection.classList.add('hidden');
+            setTimeout(() => gpaSection.classList.add('fade-in'), 10);
             navGpa.classList.add('active');
             navTimer.classList.remove('active');
         } else {
             timerSection.classList.remove('hidden');
-            gpaSection.classList.add('hidden');
+            setTimeout(() => timerSection.classList.add('fade-in'), 10);
             navTimer.classList.add('active');
             navGpa.classList.remove('active');
         }

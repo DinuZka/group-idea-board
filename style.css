@@ -1,12 +1,13 @@
 :root {
-    --primary-color: #4a6fa5;
-    --secondary-color: #166088;
-    --accent-color: #ffb703;
+    --primary-color: #800000; /* UCSC Maroon */
+    --secondary-color: #5e0000;
+    --accent-color: #FFD700; /* UCSC Gold */
     --bg-color: #f8f9fa;
     --sidebar-bg: #ffffff;
     --text-color: #333;
     --border-color: #dee2e6;
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --glow-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
 
 * {
@@ -14,6 +15,21 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
 }
 
 body {
@@ -29,6 +45,7 @@ body.dark-mode {
     --text-color: #e0e0e0;
     --border-color: #333;
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --glow-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
 }
 
 body.dark-mode .main-content {
@@ -57,7 +74,7 @@ body.dark-mode .event-date {
 .navbar {
     background-color: var(--primary-color);
     color: white;
-    padding: 1rem 2rem;
+    padding: 0.8rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -65,6 +82,21 @@ body.dark-mode .event-date {
     top: 0;
     z-index: 1000;
     box-shadow: var(--shadow);
+    border-bottom: 3px solid var(--accent-color);
+}
+
+.nav-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ucsc-logo {
+    height: 45px;
+    width: auto;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
 }
 
 .theme-toggle-container {
@@ -122,6 +154,7 @@ input:checked + .slider {
 
 input:checked + .slider:before {
     transform: translateX(22px);
+    background-color: var(--primary-color);
 }
 
 .slider.round {
@@ -148,14 +181,14 @@ input:checked + .slider:before {
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.3s;
+    transition: all 0.3s;
     padding: 0.5rem 1rem;
     border-radius: 4px;
 }
 
 .nav-links li a:hover,
 .nav-links li a.active {
-    color: white;
+    color: var(--accent-color);
     background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -190,20 +223,34 @@ input:checked + .slider:before {
 }
 
 .event-list li {
-    padding: 1rem 0;
+    padding: 1rem;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    border-radius: 6px;
 }
 
 .event-list li:last-child {
     border-bottom: none;
 }
 
+.event-list li:hover {
+    transform: scale(1.05);
+    background-color: white;
+    box-shadow: var(--glow-shadow);
+    z-index: 1;
+}
+
+body.dark-mode .event-list li:hover {
+    background-color: #2d2d2d;
+}
+
 .event-date {
     font-size: 0.8rem;
-    color: #666;
+    color: var(--primary-color);
     font-weight: bold;
     text-transform: uppercase;
 }
@@ -255,18 +302,29 @@ input, select {
     font-size: 1rem;
 }
 
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(128, 0, 0, 0.1);
+}
+
 .btn-primary, .btn-secondary, .btn-danger {
     padding: 0.7rem 1.2rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 600;
-    transition: opacity 0.3s;
+    transition: all 0.3s;
 }
 
 .btn-primary { background-color: var(--primary-color); color: white; }
+.btn-primary:hover { background-color: var(--secondary-color); transform: translateY(-2px); }
+
 .btn-secondary { background-color: #6c757d; color: white; }
+.btn-secondary:hover { opacity: 0.9; transform: translateY(-2px); }
+
 .btn-danger { background-color: #dc3545; color: white; }
+.btn-danger:hover { opacity: 0.9; transform: translateY(-2px); }
 
 .btn-remove {
     background: none;
@@ -274,6 +332,11 @@ input, select {
     color: #dc3545;
     font-size: 1.5rem;
     cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-remove:hover {
+    transform: scale(1.2);
 }
 
 .gpa-actions {
@@ -285,9 +348,14 @@ input, select {
 .result-card {
     margin-top: 2rem;
     padding: 1.5rem;
-    background-color: #e7f0f7;
+    background-color: #fff4f4;
     border-radius: 8px;
     text-align: center;
+    border-left: 5px solid var(--primary-color);
+}
+
+body.dark-mode .result-card {
+    background-color: #2c1a1a;
 }
 
 /* Study Timer Specifics */
@@ -300,7 +368,8 @@ input, select {
 .timer-circle {
     width: 250px;
     height: 250px;
-    border: 8px solid var(--primary-color);
+    border: 12px solid var(--primary-color);
+    border-top-color: var(--accent-color);
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -309,6 +378,7 @@ input, select {
     font-weight: bold;
     color: var(--primary-color);
     background-color: white;
+    box-shadow: var(--shadow);
 }
 
 .timer-controls {
@@ -326,17 +396,22 @@ input, select {
 
 .timer-type {
     padding: 0.5rem 1rem;
-    border: 1px solid var(--primary-color);
+    border: 2px solid var(--primary-color);
     background: none;
     color: var(--primary-color);
     border-radius: 20px;
     cursor: pointer;
     font-weight: 600;
+    transition: all 0.3s;
 }
 
 .timer-type.active {
     background-color: var(--primary-color);
     color: white;
+}
+
+.timer-type:hover:not(.active) {
+    background-color: rgba(128, 0, 0, 0.05);
 }
 
 /* Utility Classes */
@@ -351,5 +426,11 @@ input, select {
     .navbar {
         flex-direction: column;
         gap: 1rem;
+        text-align: center;
+    }
+
+    .nav-logo-container {
+        flex-direction: column;
     }
 }
+
