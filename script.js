@@ -1,4 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Dark Mode Logic ---
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    
+    const enableDarkMode = () => {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'enabled');
+        darkModeToggle.checked = true;
+    };
+
+    const disableDarkMode = () => {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'disabled');
+        darkModeToggle.checked = false;
+    };
+
+    // Check for saved user preference
+    if (localStorage.getItem('darkMode') === 'enabled') {
+        enableDarkMode();
+    }
+
+    darkModeToggle.addEventListener('change', () => {
+        if (darkModeToggle.checked) {
+            enableDarkMode();
+        } else {
+            disableDarkMode();
+        }
+    });
+
     // --- Navigation Logic ---
     const navGpa = document.getElementById('nav-gpa');
     const navTimer = document.getElementById('nav-timer');
@@ -72,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let totalPoints = 0;
         let totalCredits = 0;
-        let valid = true;
 
         credits.forEach((creditInput, index) => {
             const credit = parseFloat(creditInput.value);
@@ -93,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (gpa >= 3.0) gpaMessage.textContent = "Great job! You're doing well.";
             else if (gpa >= 2.0) gpaMessage.textContent = "Good effort. Focus on improving.";
             else gpaMessage.textContent = "Keep working hard!";
+            
+            // Scroll to result on mobile
+            gpaResult.scrollIntoView({ behavior: 'smooth' });
         } else {
             alert("Please enter credits and grades for at least one course.");
         }
@@ -109,16 +139,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.getElementById('timer-reset');
     const typeBtns = document.querySelectorAll('.timer-type');
 
+    // Function to play a notification sound
+    const playNotificationSound = () => {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.1);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 1);
+        } catch (e) {
+            console.log("Audio not supported or blocked");
+        }
+    };
+
     const updateDisplay = () => {
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
         timeLeftDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        document.title = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} - Student Toolkit`;
     };
 
     const startTimer = () => {
         if (isRunning) return;
         isRunning = true;
         startBtn.disabled = true;
+        pauseBtn.disabled = false;
         
         timerInterval = setInterval(() => {
             timeLeft--;
@@ -128,7 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(timerInterval);
                 isRunning = false;
                 startBtn.disabled = false;
-                alert("Time's up!");
+                playNotificationSound();
+                alert("Time's up! Take a break.");
             }
         }, 1000);
     };
@@ -137,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(timerInterval);
         isRunning = false;
         startBtn.disabled = false;
+        pauseBtn.disabled = true;
     };
 
     const resetTimer = () => {
@@ -144,6 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeBtn = document.querySelector('.timer-type.active');
         timeLeft = parseInt(activeBtn.dataset.time) * 60;
         updateDisplay();
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
     };
 
     typeBtns.forEach(btn => {
@@ -162,4 +221,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize timer display
     updateDisplay();
+    pauseBtn.disabled = true;
 });

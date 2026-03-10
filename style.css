@@ -20,6 +20,37 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --sidebar-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --border-color: #333;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .main-content {
+    background-color: #1e1e1e;
+}
+
+body.dark-mode .timer-circle {
+    background-color: #1e1e1e;
+}
+
+body.dark-mode .result-card {
+    background-color: #2c3e50;
+}
+
+body.dark-mode input, body.dark-mode select {
+    background-color: #2d2d2d;
+    color: white;
+    border-color: #444;
+}
+
+body.dark-mode .event-date {
+    color: #aaa;
 }
 
 /* Navbar Styles */
@@ -34,6 +65,71 @@ body {
     top: 0;
     z-index: 1000;
     box-shadow: var(--shadow);
+}
+
+.theme-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-left: 1rem;
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    color: white;
+    font-weight: 500;
+}
+
+/* Toggle Switch Styles */
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+}
+
+.theme-switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--accent-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+.slider.round {
+    border-radius: 22px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
 }
 
 .nav-logo {
