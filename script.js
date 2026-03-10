@@ -28,33 +28,63 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Navigation Logic ---
+    const navIdea = document.getElementById('nav-idea');
     const navGpa = document.getElementById('nav-gpa');
     const navTimer = document.getElementById('nav-timer');
+    const ideaSection = document.getElementById('idea-section');
     const gpaSection = document.getElementById('gpa-section');
     const timerSection = document.getElementById('timer-section');
 
     const switchTab = (tab) => {
-        const sections = [gpaSection, timerSection];
+        const sections = [ideaSection, gpaSection, timerSection];
+        const navLinks = [navIdea, navGpa, navTimer];
+        
         sections.forEach(s => {
             s.classList.add('hidden');
             s.classList.remove('fade-in');
         });
+        navLinks.forEach(l => l.classList.remove('active'));
 
-        if (tab === 'gpa') {
+        if (tab === 'idea') {
+            ideaSection.classList.remove('hidden');
+            setTimeout(() => ideaSection.classList.add('fade-in'), 10);
+            navIdea.classList.add('active');
+        } else if (tab === 'gpa') {
             gpaSection.classList.remove('hidden');
             setTimeout(() => gpaSection.classList.add('fade-in'), 10);
             navGpa.classList.add('active');
-            navTimer.classList.remove('active');
         } else {
             timerSection.classList.remove('hidden');
             setTimeout(() => timerSection.classList.add('fade-in'), 10);
             navTimer.classList.add('active');
-            navGpa.classList.remove('active');
         }
     };
 
+    navIdea.addEventListener('click', (e) => { e.preventDefault(); switchTab('idea'); });
     navGpa.addEventListener('click', (e) => { e.preventDefault(); switchTab('gpa'); });
     navTimer.addEventListener('click', (e) => { e.preventDefault(); switchTab('timer'); });
+
+    // --- Idea Board Logic ---
+    const addIdeaBtn = document.getElementById('add-idea-btn');
+    const ideaInput = document.getElementById('idea-input');
+    const ideaList = document.getElementById('idea-list');
+
+    addIdeaBtn.addEventListener('click', () => {
+        const idea = ideaInput.value.trim();
+
+        if (idea === "") {
+            alert("Please enter an idea.");
+            return;
+        }
+
+        const li = document.createElement('li');
+        li.textContent = idea;
+        
+        ideaList.appendChild(li);
+        
+        // Clear idea input
+        ideaInput.value = "";
+    });
 
     // --- GPA Calculator Logic ---
     const courseList = document.getElementById('course-list');

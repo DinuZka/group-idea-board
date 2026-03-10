@@ -13,6 +13,7 @@
             <div class="nav-logo">Student Toolkit</div>
         </div>
         <ul class="nav-links">
+            <li><a href="#" id="nav-idea">Idea Board</a></li>
             <li><a href="#" id="nav-gpa" class="active">GPA Calculator</a></li>
             <li><a href="#" id="nav-timer">Study Timer</a></li>
             <li class="theme-toggle-container">
@@ -49,6 +50,26 @@
         </aside>
 
         <main class="main-content fade-in" style="animation-delay: 0.4s;">
+            <!-- Idea Board Section -->
+            <section id="idea-section" class="tool-section hidden">
+                <h2>Group Idea Board</h2>
+                <p>Collaborate and share your project ideas with the team.</p>
+                
+                <div class="idea-controls">
+                    <input type="text" id="idea-input" placeholder="Enter your idea here..." />
+                    <button id="add-idea-btn" class="btn-primary">Add Idea</button>
+                </div>
+
+                <div class="ideas-display">
+                    <div class="category-group">
+                        <h3 class="category-header">Submitted Ideas</h3>
+                        <ul id="idea-list" class="idea-list-items">
+                            <!-- All ideas will be added here -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
             <!-- GPA Calculator Section -->
             <section id="gpa-section" class="tool-section">
                 <h2>GPA Calculator</h2>
