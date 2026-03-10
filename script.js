@@ -1,0 +1,165 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Navigation Logic ---
+    const navGpa = document.getElementById('nav-gpa');
+    const navTimer = document.getElementById('nav-timer');
+    const gpaSection = document.getElementById('gpa-section');
+    const timerSection = document.getElementById('timer-section');
+
+    const switchTab = (tab) => {
+        if (tab === 'gpa') {
+            gpaSection.classList.remove('hidden');
+            timerSection.classList.add('hidden');
+            navGpa.classList.add('active');
+            navTimer.classList.remove('active');
+        } else {
+            timerSection.classList.remove('hidden');
+            gpaSection.classList.add('hidden');
+            navTimer.classList.add('active');
+            navGpa.classList.remove('active');
+        }
+    };
+
+    navGpa.addEventListener('click', (e) => { e.preventDefault(); switchTab('gpa'); });
+    navTimer.addEventListener('click', (e) => { e.preventDefault(); switchTab('timer'); });
+
+    // --- GPA Calculator Logic ---
+    const courseList = document.getElementById('course-list');
+    const addCourseBtn = document.getElementById('add-course');
+    const calculateGpaBtn = document.getElementById('calculate-gpa');
+    const gpaResult = document.getElementById('gpa-result');
+    const gpaValue = document.getElementById('gpa-value');
+    const gpaMessage = document.getElementById('gpa-message');
+
+    const gradePoints = {
+        'A+': 4.0, 'A': 4.0, 'A-': 3.7,
+        'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+        'C+': 2.3, 'C': 2.0, 'C-': 1.7,
+        'D+': 1.3, 'D': 1.0, 'F': 0.0
+    };
+
+    const createCourseRow = () => {
+        const row = document.createElement('div');
+        row.className = 'course-row';
+        row.innerHTML = `
+            <input type="text" placeholder="e.g. Mathematics" class="course-name">
+            <input type="number" placeholder="Credits" class="course-credits" min="0" step="0.5">
+            <select class="course-grade">
+                <option value="">Grade</option>
+                ${Object.keys(gradePoints).map(g => `<option value="${g}">${g}</option>`).join('')}
+            </select>
+            <button class="btn-remove">&times;</button>
+        `;
+
+        row.querySelector('.btn-remove').addEventListener('click', () => {
+            row.remove();
+        });
+
+        return row;
+    };
+
+    // Add 3 initial rows
+    for (let i = 0; i < 3; i++) {
+        courseList.appendChild(createCourseRow());
+    }
+
+    addCourseBtn.addEventListener('click', () => {
+        courseList.appendChild(createCourseRow());
+    });
+
+    calculateGpaBtn.addEventListener('click', () => {
+        const credits = document.querySelectorAll('.course-credits');
+        const grades = document.querySelectorAll('.course-grade');
+        
+        let totalPoints = 0;
+        let totalCredits = 0;
+        let valid = true;
+
+        credits.forEach((creditInput, index) => {
+            const credit = parseFloat(creditInput.value);
+            const grade = grades[index].value;
+
+            if (!isNaN(credit) && grade !== "") {
+                totalCredits += credit;
+                totalPoints += (credit * gradePoints[grade]);
+            }
+        });
+
+        if (totalCredits > 0) {
+            const gpa = (totalPoints / totalCredits).toFixed(2);
+            gpaValue.textContent = gpa;
+            gpaResult.classList.remove('hidden');
+
+            if (gpa >= 3.5) gpaMessage.textContent = "Excellent work! Keep it up.";
+            else if (gpa >= 3.0) gpaMessage.textContent = "Great job! You're doing well.";
+            else if (gpa >= 2.0) gpaMessage.textContent = "Good effort. Focus on improving.";
+            else gpaMessage.textContent = "Keep working hard!";
+        } else {
+            alert("Please enter credits and grades for at least one course.");
+        }
+    });
+
+    // --- Study Timer Logic ---
+    let timerInterval;
+    let timeLeft = 25 * 60; // 25 minutes default
+    let isRunning = false;
+
+    const timeLeftDisplay = document.getElementById('time-left');
+    const startBtn = document.getElementById('timer-start');
+    const pauseBtn = document.getElementById('timer-pause');
+    const resetBtn = document.getElementById('timer-reset');
+    const typeBtns = document.querySelectorAll('.timer-type');
+
+    const updateDisplay = () => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timeLeftDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const startTimer = () => {
+        if (isRunning) return;
+        isRunning = true;
+        startBtn.disabled = true;
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateDisplay();
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                startBtn.disabled = false;
+                alert("Time's up!");
+            }
+        }, 1000);
+    };
+
+    const pauseTimer = () => {
+        clearInterval(timerInterval);
+        isRunning = false;
+        startBtn.disabled = false;
+    };
+
+    const resetTimer = () => {
+        pauseTimer();
+        const activeBtn = document.querySelector('.timer-type.active');
+        timeLeft = parseInt(activeBtn.dataset.time) * 60;
+        updateDisplay();
+    };
+
+    typeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            typeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            timeLeft = parseInt(btn.dataset.time) * 60;
+            updateDisplay();
+            pauseTimer();
+        });
+    });
+
+    startBtn.addEventListener('click', startTimer);
+    pauseBtn.addEventListener('click', pauseTimer);
+    resetBtn.addEventListener('click', resetTimer);
+
+    // Initialize timer display
+    updateDisplay();
+});

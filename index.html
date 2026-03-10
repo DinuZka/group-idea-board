@@ -1,218 +1,96 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Group Idea Board</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Toolkit</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">Student Toolkit</div>
+        <ul class="nav-links">
+            <li><a href="#" id="nav-gpa" class="active">GPA Calculator</a></li>
+            <li><a href="#" id="nav-timer">Study Timer</a></li>
+        </ul>
+    </nav>
 
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        background: #121212;
-        color: #e4e4e4;
-      }
-
-      /* CONTAINER */
-
-      .container {
-        width: 850px;
-        margin: 60px auto;
-        background: #1e1e1e;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-        overflow: hidden;
-      }
-
-      /* HEADER */
-
-      .header {
-        background: linear-gradient(90deg, #6a5cff, #4b8cff);
-        color: white;
-        text-align: center;
-        padding: 20px;
-        font-size: 24px;
-        font-weight: 600;
-        letter-spacing: 1px;
-      }
-
-      /* INPUT SECTION */
-
-      .controls {
-        display: flex;
-        gap: 12px;
-        padding: 20px;
-        border-bottom: 1px solid #333;
-      }
-
-      /* INPUTS */
-
-      select,
-      input {
-        padding: 10px;
-        font-size: 14px;
-        border: 1px solid #444;
-        border-radius: 6px;
-        background: #2b2b2b;
-        color: #e4e4e4;
-      }
-
-      select {
-        width: 200px;
-      }
-
-      input {
-        flex: 1;
-      }
-
-      input::placeholder {
-        color: #888;
-      }
-
-      input:focus,
-      select:focus {
-        border-color: #6a5cff;
-        outline: none;
-      }
-
-      /* BUTTON */
-
-      button {
-        background: linear-gradient(135deg, #6a5cff, #4b8cff);
-        color: white;
-        border: none;
-        padding: 10px 18px;
-        font-size: 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: 0.25s;
-      }
-
-      button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 10px rgba(106, 92, 255, 0.6);
-      }
-
-      /* IDEA LIST */
-
-      .ideas-section {
-        padding: 25px 40px;
-      }
-
-      .category-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #6a5cff;
-        margin-top: 20px;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #444;
-        padding-bottom: 10px;
-      }
-
-      .category-title:first-child {
-        margin-top: 0;
-      }
-
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      li {
-        margin: 8px 0;
-        padding: 10px 15px;
-        background: #2b2b2b;
-        border-left: 4px solid #6a5cff;
-        border-radius: 6px;
-        font-size: 15px;
-      }
-
-      li i {
-        color: #9aa0ff;
-      }
-    </style>
-  </head>
-
-  <body>
     <div class="container">
-      <div class="header">Group 1 Day 3 Project (Group Idea Board)</div>
+        <aside class="sidebar">
+            <h3>Upcoming Events</h3>
+            <ul class="event-list">
+                <li>
+                    <span class="event-date">Oct 15</span>
+                    <span class="event-name">Midterm Exams</span>
+                </li>
+                <li>
+                    <span class="event-date">Oct 22</span>
+                    <span class="event-name">Project Submission</span>
+                </li>
+                <li>
+                    <span class="event-date">Nov 05</span>
+                    <span class="event-name">Study Group Meetup</span>
+                </li>
+                <li>
+                    <span class="event-date">Nov 12</span>
+                    <span class="event-name">Career Fair</span>
+                </li>
+            </ul>
+        </aside>
 
-      <div class="controls">
-        <select id="name">
-          <option value="">Select your name...</option>
-          <option>Vihanga</option>
-          <option>Thilina</option>
-          <option>Shehan</option>
-          <option>Thaveesha</option>
-          <option>Pasindu</option>
-          <option>Sulani</option>
-          <option>Asvini</option>
-          <option>Sandali</option>
-          <option>Lakshan</option>
-          <option>Dinushka</option>
-        </select>
+        <main class="main-content">
+            <!-- GPA Calculator Section -->
+            <section id="gpa-section" class="tool-section">
+                <h2>GPA Calculator</h2>
+                <p>Calculate your semester GPA by adding your courses and grades below.</p>
+                
+                <div id="course-list">
+                    <div class="course-row header">
+                        <span>Course Name</span>
+                        <span>Credits</span>
+                        <span>Grade</span>
+                        <span></span>
+                    </div>
+                    <!-- Rows will be added here via JS -->
+                </div>
+                
+                <div class="gpa-actions">
+                    <button id="add-course" class="btn-secondary">+ Add Course</button>
+                    <button id="calculate-gpa" class="btn-primary">Calculate GPA</button>
+                </div>
 
-        <select id="category">
-          <option value="">Select category...</option>
-          <option value="coders">Coders</option>
-          <option value="prompter">Prompter</option>
-          <option value="qa">QA</option>
-        </select>
+                <div id="gpa-result" class="result-card hidden">
+                    <h3>Your GPA: <span id="gpa-value">0.00</span></h3>
+                    <p id="gpa-message"></p>
+                </div>
+            </section>
 
-        <input type="text" id="idea" placeholder="Enter your idea here..." />
+            <!-- Study Timer Section -->
+            <section id="timer-section" class="tool-section hidden">
+                <h2>Study Timer</h2>
+                <p>Stay focused with a Pomodoro-style study timer.</p>
+                
+                <div class="timer-display">
+                    <div class="timer-circle">
+                        <span id="time-left">25:00</span>
+                    </div>
+                </div>
 
-        <button onclick="addIdea()">Add Idea</button>
-      </div>
+                <div class="timer-controls">
+                    <button id="timer-start" class="btn-primary">Start</button>
+                    <button id="timer-pause" class="btn-secondary">Pause</button>
+                    <button id="timer-reset" class="btn-danger">Reset</button>
+                </div>
 
-      <div class="ideas-section">
-        <div>
-          <div class="category-title">Coders</div>
-          <ul id="coders-list">
-            <li><i>Vihanga, Thilina, Shehan, Dinushka</i></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="category-title">Prompter</div>
-          <ul id="prompter-list">
-            <li><i>Vihanga, Sulani, Lakshan</i></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="category-title">QA</div>
-          <ul id="qa-list">
-            <li><i>Lakshan, Sandali, Pasindu, Thaveesha, Asvini</i></li>
-          </ul>
-        </div>
-      </div>
+                <div class="timer-settings">
+                    <button class="timer-type active" data-time="25">Study (25m)</button>
+                    <button class="timer-type" data-time="5">Short Break (5m)</button>
+                    <button class="timer-type" data-time="15">Long Break (15m)</button>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <script>
-      function addIdea() {
-        let name = document.getElementById("name").value;
-        let idea = document.getElementById("idea").value;
-        let category = document.getElementById("category").value;
-
-        if (name === "" || idea === "" || category === "") {
-          alert("Please select name, category, and enter idea");
-          return;
-        }
-
-        let li = document.createElement("li");
-        li.innerHTML = idea + " – <i>suggested by " + name + "</i>";
-
-        let categoryList = document.getElementById(category + "-list");
-        categoryList.appendChild(li);
-
-        document.getElementById("idea").value = "";
-        document.getElementById("name").value = "";
-      }
-    </script>
-  </body>
+    <script src="script.js"></script>
+</body>
 </html>
