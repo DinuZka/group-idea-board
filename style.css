@@ -414,6 +414,32 @@ body.dark-mode .result-card {
     background-color: rgba(128, 0, 0, 0.05);
 }
 
+body.dark-mode .timer-type {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+body.dark-mode .timer-type.active {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    border-color: var(--accent-color);
+}
+
+body.dark-mode .timer-type:hover:not(.active) {
+    background-color: rgba(255, 215, 0, 0.1);
+}
+
+body.dark-mode .btn-primary {
+    background-color: #a30000; /* Lighter maroon for dark mode */
+    border: 1px solid var(--accent-color);
+}
+
+body.dark-mode .timer-circle {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
 /* Utility Classes */
 .hidden { display: none; }
 
