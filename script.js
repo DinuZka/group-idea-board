@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const ideaSection = document.getElementById('idea-section');
     const gpaSection = document.getElementById('gpa-section');
     const timerSection = document.getElementById('timer-section');
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinksContainer = document.querySelector('.nav-links');
+
+    const toggleMobileMenu = () => {
+        mobileMenuToggle.classList.toggle('open');
+        navLinksContainer.classList.toggle('active');
+    };
+
+    mobileMenuToggle.addEventListener('click', toggleMobileMenu);
 
     const switchTab = (tab) => {
         const sections = [ideaSection, gpaSection, timerSection];
@@ -58,6 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => timerSection.classList.add('fade-in'), 10);
             navTimer.classList.add('active');
         }
+
+        // Close mobile menu after selection
+        mobileMenuToggle.classList.remove('open');
+        navLinksContainer.classList.remove('active');
     };
 
     navIdea.addEventListener('click', (e) => { e.preventDefault(); switchTab('idea'); });
