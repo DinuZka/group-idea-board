@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navTimer.addEventListener('click', (e) => { e.preventDefault(); switchTab('timer'); });
 
     // --- Toast Notification System ---
-    const showToast = (message, title = "Error") => {
+    const showToast = (message, title = "Error", type = "error") => {
         let container = document.querySelector('.toast-container');
         if (!container) {
             container = document.createElement('div');
@@ -74,9 +74,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const toast = document.createElement('div');
-        toast.className = 'toast';
+        toast.className = `toast toast-${type}`;
+        
+        const icons = {
+            error: "⚠️",
+            warning: "🔔",
+            success: "✅",
+            info: "ℹ️"
+        };
+
         toast.innerHTML = `
-            <div class="toast-icon">⚠️</div>
+            <div class="toast-icon">${icons[type] || "⚠️"}</div>
             <div class="toast-content">
                 <h4>${title}</h4>
                 <p>${message}</p>
@@ -94,8 +102,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Idea Board Logic ---
     const addIdeaBtn = document.getElementById('add-idea-btn');
+    const aiSummarizeBtn = document.getElementById('ai-summarize-btn');
     const ideaInput = document.getElementById('idea-input');
     const ideaList = document.getElementById('idea-list');
+    const charCounter = document.getElementById('char-counter');
+    const inputContainer = document.querySelector('.input-with-counter');
+
+    // Update character counter
+    const updateCharCounter = () => {
+        const length = ideaInput.value.length;
+        charCounter.textContent = `${length} / 200`;
+        
+        if (length > 200) {
+            charCounter.classList.add('limit-exceeded');
+        } else {
+            charCounter.classList.remove('limit-exceeded');
+        }
+    };
+
+    ideaInput.addEventListener('input', updateCharCounter);
 
     // Load ideas from localStorage on page load
     const loadIdeas = () => {
@@ -113,12 +138,108 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('ideas', JSON.stringify(savedIdeas));
     };
 
-    const handleAddIdea = () => {
-        const ideaValue = ideaInput.value.trim();
+    // Function to sanitize text (remove tags and restricted characters)
+    const sanitizeText = (text) => {
+        const tagRegex = /<[^>]*>/g;
+        const restrictedCharsRegex = /[<>{}[\]\\|^~]/g;
+        return text.replace(tagRegex, "").replace(restrictedCharsRegex, "");
+    };
+
+    // Simulated AI Summarization function
+    const summarizeWithAI = async (text) => {
+        // Simulation of Cloud AI processing
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                // Mock summarization: Take first 150 chars, add "..." and a tag
+                // If text is already short, just return a slightly condensed version
+                let summary;
+                if (text.length > 100) {
+                    summary = text.substring(0, 80) + "... [AI Summarized]";
+                } else if (text.length > 20) {
+                    summary = text.substring(0, Math.floor(text.length * 0.7)) + "... [AI Shortened]";
+                } else {
+                    summary = text + " [AI Processed]";
+                }
+                
+                // Sanitize the AI output just in case it "generated" something invalid
+                resolve(sanitizeText(summary));
+            }, 2500); // Slightly longer for the "cool animation" to be seen
+        });
+    };
+
+    const handleManualSummarize = async () => {
+        const text = ideaInput.value.trim();
+        if (text === "") {
+            showToast("Please enter some text to summarize.", "Empty Input");
+            return;
+        }
+
+        // Trigger animations
+        inputContainer.classList.add('ai-summarizing');
+        aiSummarizeBtn.disabled = true;
+        const originalBtnText = aiSummarizeBtn.innerHTML;
+        aiSummarizeBtn.innerHTML = `<span class="spinner"></span> Thinking...`;
+
+        try {
+            const summarizedText = await summarizeWithAI(text);
+            ideaInput.value = summarizedText;
+            updateCharCounter();
+            showToast("AI has successfully summarized your text.", "Summary Ready", "success");
+        } catch (error) {
+            showToast("AI failed to process. Please try again.", "AI Error");
+        } finally {
+            inputContainer.classList.remove('ai-summarizing');
+            aiSummarizeBtn.disabled = false;
+            aiSummarizeBtn.innerHTML = originalBtnText;
+        }
+    };
+
+    const handleAddIdea = async () => {
+        let ideaValue = ideaInput.value.trim();
 
         if (ideaValue === "") {
             showToast("Please enter an idea before clicking add.", "Empty Input");
             return;
+        }
+
+        // Check for HTML tags or programming-like syntax
+        const tagRegex = /<[^>]*>/g;
+        const restrictedCharsRegex = /[<>{}[\]\\|^~]/;
+
+        if (tagRegex.test(ideaValue)) {
+            showToast("HTML tags are not allowed in ideas.", "Security Warning", "error");
+            return;
+        }
+
+        if (restrictedCharsRegex.test(ideaValue)) {
+            showToast("Special programming characters (like { } [ ] \\ | ^ ~) are not allowed.", "Invalid Characters", "error");
+            return;
+        }
+
+        // Automatic character limit check (200 characters)
+        if (ideaValue.length > 200) {
+            showToast("Maximum characters (200) exceeded! Using Cloud AI to summarize...", "Character Limit", "warning");
+            
+            // Disable buttons and show loading state
+            addIdeaBtn.disabled = true;
+            aiSummarizeBtn.disabled = true;
+            inputContainer.classList.add('ai-summarizing');
+            
+            const originalBtnText = addIdeaBtn.textContent;
+            addIdeaBtn.innerHTML = `<span class="spinner"></span> AI processing...`;
+            
+            try {
+                ideaValue = await summarizeWithAI(ideaValue);
+                showToast("Your idea has been automatically summarized.", "AI Summary Complete", "success");
+            } catch (error) {
+                showToast("AI summarization failed. Please try a shorter idea.", "AI Error");
+                return;
+            } finally {
+                inputContainer.classList.remove('ai-summarizing');
+                addIdeaBtn.disabled = false;
+                aiSummarizeBtn.disabled = false;
+                addIdeaBtn.textContent = originalBtnText;
+            }
         }
 
         // Check if idea already exists (case-insensitive and trimmed)
@@ -137,14 +258,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Save to localStorage
         saveIdea(ideaValue);
         
-        // Clear input field
+        // Clear input field and reset counter
         ideaInput.value = "";
+        updateCharCounter();
     };
 
     // Initialize ideas
     loadIdeas();
 
     addIdeaBtn.addEventListener('click', handleAddIdea);
+    aiSummarizeBtn.addEventListener('click', handleManualSummarize);
 
     // Allow adding idea by pressing Enter key
     ideaInput.addEventListener('keypress', (e) => {

@@ -59,8 +59,15 @@
                 <p>Collaborate and share your project ideas with the team.</p>
                 
                 <div class="idea-controls">
-                    <input type="text" id="idea-input" placeholder="Enter your idea here..." />
-                    <button id="add-idea-btn" class="btn-primary">Add Idea</button>
+                    <div class="input-with-counter">
+                        <input type="text" id="idea-input" placeholder="Enter your idea here..." />
+                        <span id="char-counter">0 / 200</span>
+                        <div class="ai-scan-line"></div>
+                    </div>
+                    <div class="button-group">
+                        <button id="ai-summarize-btn" class="btn-secondary">✨ AI Summarize</button>
+                        <button id="add-idea-btn" class="btn-primary">Add Idea</button>
+                    </div>
                 </div>
 
                 <div class="ideas-display">
