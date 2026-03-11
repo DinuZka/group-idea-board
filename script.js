@@ -127,6 +127,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     };
 
+    // --- Custom Confirm Modal ---
+    const showConfirmModal = (message, onConfirm) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        
+        overlay.innerHTML = `
+            <div class="modal-content">
+                <h3>Delete Confirmation</h3>
+                <p>${message}</p>
+                <div class="modal-actions">
+                    <button class="btn-secondary cancel-modal">Cancel</button>
+                    <button class="btn-primary confirm-modal">Delete</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const closeBtn = overlay.querySelector('.cancel-modal');
+        const confirmBtn = overlay.querySelector('.confirm-modal');
+
+        const closeModal = () => {
+            overlay.classList.add('fade-out'); // Add a fade out if needed or just remove
+            setTimeout(() => overlay.remove(), 200);
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        confirmBtn.addEventListener('click', () => {
+            onConfirm();
+            closeModal();
+        });
+
+        // Close on overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+    };
+
     // --- Idea Board Logic ---
     const addIdeaBtn = document.getElementById('add-idea-btn');
     const aiSummarizeBtn = document.getElementById('ai-summarize-btn');
@@ -153,8 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadIdeas = () => {
         const savedIdeas = JSON.parse(localStorage.getItem('ideas')) || [];
         savedIdeas.forEach(ideaText => {
-            const li = document.createElement('li');
-            li.textContent = ideaText;
+            const li = createIdeaElement(ideaText);
             ideaList.appendChild(li);
         });
     };
@@ -163,6 +200,138 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedIdeas = JSON.parse(localStorage.getItem('ideas')) || [];
         savedIdeas.push(ideaText);
         localStorage.setItem('ideas', JSON.stringify(savedIdeas));
+    };
+
+    const deleteIdeaFromStorage = (ideaText) => {
+        let savedIdeas = JSON.parse(localStorage.getItem('ideas')) || [];
+        savedIdeas = savedIdeas.filter(idea => idea !== ideaText);
+        localStorage.setItem('ideas', JSON.stringify(savedIdeas));
+    };
+
+    const updateIdeaInStorage = (oldText, newText) => {
+        let savedIdeas = JSON.parse(localStorage.getItem('ideas')) || [];
+        const index = savedIdeas.indexOf(oldText);
+        if (index !== -1) {
+            savedIdeas[index] = newText;
+            localStorage.setItem('ideas', JSON.stringify(savedIdeas));
+        }
+    };
+
+    const createIdeaElement = (ideaText) => {
+        const li = document.createElement('li');
+        
+        const renderDefault = () => {
+            li.innerHTML = `
+                <span class="idea-text">${ideaText}</span>
+                <div class="idea-actions">
+                    <button class="btn-icon edit-btn" title="Edit Idea">✏️</button>
+                    <button class="btn-icon delete-btn" title="Delete Idea">🗑️</button>
+                </div>
+            `;
+
+            li.querySelector('.delete-btn').addEventListener('click', () => {
+                showConfirmModal("Are you sure you want to delete this comment?", () => {
+                    deleteIdeaFromStorage(ideaText);
+                    li.remove();
+                    showToast("Idea deleted successfully.", "Deleted", "info");
+                });
+            });
+
+            li.querySelector('.edit-btn').addEventListener('click', () => {
+                renderEditMode();
+            });
+        };
+
+        const renderEditMode = () => {
+            li.innerHTML = `
+                <div class="edit-mode-container">
+                    <input type="text" class="edit-input" value="${ideaText}">
+                    <div class="edit-actions">
+                        <button class="btn-secondary ai-edit-btn">✨ AI Summarize</button>
+                        <button class="btn-secondary cancel-btn">Cancel</button>
+                        <button class="btn-primary save-btn">Save</button>
+                    </div>
+                </div>
+            `;
+
+            const editInput = li.querySelector('.edit-input');
+            const aiBtn = li.querySelector('.ai-edit-btn');
+            const cancelBtn = li.querySelector('.cancel-btn');
+            const saveBtn = li.querySelector('.save-btn');
+
+            aiBtn.addEventListener('click', async () => {
+                const text = editInput.value.trim();
+                if (!text) return;
+                
+                aiBtn.disabled = true;
+                aiBtn.innerHTML = `<span class="spinner"></span>...`;
+                const summarized = await summarizeWithAI(text);
+                editInput.value = summarized;
+                aiBtn.disabled = false;
+                aiBtn.innerHTML = `✨ AI Summarize`;
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                renderDefault();
+            });
+
+            saveBtn.addEventListener('click', async () => {
+                let newText = editInput.value.trim();
+                
+                if (newText === "") {
+                    showToast("Idea cannot be empty.", "Empty Input");
+                    return;
+                }
+
+                // Check for HTML tags or programming-like syntax
+                const tagRegex = /<[^>]*>/g;
+                const restrictedCharsRegex = /[<>{}[\]\\|^~]/;
+
+                if (tagRegex.test(newText)) {
+                    showToast("HTML tags are not allowed.", "Security Warning", "error");
+                    return;
+                }
+
+                if (restrictedCharsRegex.test(newText)) {
+                    showToast("Special programming characters are not allowed.", "Invalid Characters", "error");
+                    return;
+                }
+
+                // Automatic character limit check (200 characters)
+                if (newText.length > 200) {
+                    showToast("Maximum characters (200) exceeded! Summarizing...", "Character Limit", "warning");
+                    
+                    saveBtn.disabled = true;
+                    aiBtn.disabled = true;
+                    const originalBtnText = saveBtn.textContent;
+                    saveBtn.innerHTML = `<span class="spinner"></span>...`;
+                    
+                    try {
+                        newText = await summarizeWithAI(newText);
+                    } catch (error) {
+                        showToast("Summarization failed.", "AI Error");
+                        return;
+                    } finally {
+                        saveBtn.disabled = false;
+                        aiBtn.disabled = false;
+                        saveBtn.textContent = originalBtnText;
+                    }
+                }
+
+                if (newText === ideaText) {
+                    renderDefault();
+                    return;
+                }
+
+                updateIdeaInStorage(ideaText, newText);
+                ideaText = newText;
+                renderDefault();
+                showToast("Idea updated successfully.", "Updated", "success");
+            });
+        };
+
+        renderDefault();
+        return li;
     };
 
     // Function to sanitize text (remove tags and restricted characters)
@@ -310,8 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const li = document.createElement('li');
-        li.textContent = ideaValue;
+        const li = createIdeaElement(ideaValue);
         ideaList.appendChild(li);
         
         // Save to localStorage
