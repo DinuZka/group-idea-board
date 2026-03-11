@@ -64,6 +64,34 @@ document.addEventListener('DOMContentLoaded', () => {
     navGpa.addEventListener('click', (e) => { e.preventDefault(); switchTab('gpa'); });
     navTimer.addEventListener('click', (e) => { e.preventDefault(); switchTab('timer'); });
 
+    // --- Toast Notification System ---
+    const showToast = (message, title = "Error") => {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <div class="toast-icon">⚠️</div>
+            <div class="toast-content">
+                <h4>${title}</h4>
+                <p>${message}</p>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
+    };
+
     // --- Idea Board Logic ---
     const addIdeaBtn = document.getElementById('add-idea-btn');
     const ideaInput = document.getElementById('idea-input');
@@ -73,7 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const idea = ideaInput.value.trim();
 
         if (idea === "") {
-            alert("Please enter an idea.");
+            showToast("Please enter an idea before clicking add.", "Empty Input");
+            return;
+        }
+
+        // Check if idea already exists
+        const existingIdeas = Array.from(ideaList.querySelectorAll('li')).map(li => li.textContent.trim().toLowerCase());
+        if (existingIdeas.includes(idea.toLowerCase())) {
+            showToast("the idea is already exist kindly enter new idea for the idea borad", "Duplicate Idea");
             return;
         }
 
