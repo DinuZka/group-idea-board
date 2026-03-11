@@ -97,28 +97,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const ideaInput = document.getElementById('idea-input');
     const ideaList = document.getElementById('idea-list');
 
-    addIdeaBtn.addEventListener('click', () => {
-        const idea = ideaInput.value.trim();
+    // Load ideas from localStorage on page load
+    const loadIdeas = () => {
+        const savedIdeas = JSON.parse(localStorage.getItem('ideas')) || [];
+        savedIdeas.forEach(ideaText => {
+            const li = document.createElement('li');
+            li.textContent = ideaText;
+            ideaList.appendChild(li);
+        });
+    };
 
-        if (idea === "") {
+    const saveIdea = (ideaText) => {
+        const savedIdeas = JSON.parse(localStorage.getItem('ideas')) || [];
+        savedIdeas.push(ideaText);
+        localStorage.setItem('ideas', JSON.stringify(savedIdeas));
+    };
+
+    const handleAddIdea = () => {
+        const ideaValue = ideaInput.value.trim();
+
+        if (ideaValue === "") {
             showToast("Please enter an idea before clicking add.", "Empty Input");
             return;
         }
 
-        // Check if idea already exists
-        const existingIdeas = Array.from(ideaList.querySelectorAll('li')).map(li => li.textContent.trim().toLowerCase());
-        if (existingIdeas.includes(idea.toLowerCase())) {
-            showToast("the idea is already exist kindly enter new idea for the idea borad", "Duplicate Idea");
+        // Check if idea already exists (case-insensitive and trimmed)
+        const existingIdeas = Array.from(ideaList.querySelectorAll('li'))
+            .map(li => li.textContent.trim().toLowerCase());
+
+        if (existingIdeas.includes(ideaValue.toLowerCase())) {
+            showToast("The idea already exists! Please enter a new idea.", "Duplicate Idea");
             return;
         }
 
         const li = document.createElement('li');
-        li.textContent = idea;
-        
+        li.textContent = ideaValue;
         ideaList.appendChild(li);
         
-        // Clear idea input
+        // Save to localStorage
+        saveIdea(ideaValue);
+        
+        // Clear input field
         ideaInput.value = "";
+    };
+
+    // Initialize ideas
+    loadIdeas();
+
+    addIdeaBtn.addEventListener('click', handleAddIdea);
+
+    // Allow adding idea by pressing Enter key
+    ideaInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleAddIdea();
+        }
     });
 
     // --- GPA Calculator Logic ---
