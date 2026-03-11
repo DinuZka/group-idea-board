@@ -86,6 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(container);
         }
 
+        // Prevent duplicate toasts with the same message
+        const existingToasts = Array.from(container.querySelectorAll('.toast'));
+        const isDuplicate = existingToasts.some(t => {
+            const p = t.querySelector('p');
+            return p && p.textContent === message;
+        });
+
+        if (isDuplicate) return;
+
+        // Limit maximum number of toasts to 3
+        if (existingToasts.length >= 3) {
+            existingToasts[0].remove();
+        }
+
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         
@@ -158,25 +172,57 @@ document.addEventListener('DOMContentLoaded', () => {
         return text.replace(tagRegex, "").replace(restrictedCharsRegex, "");
     };
 
-    // Simulated AI Summarization function
+    // Simulated Professional AI Summarization function
     const summarizeWithAI = async (text) => {
-        // Simulation of Cloud AI processing
         return new Promise((resolve) => {
             setTimeout(() => {
-                // Mock summarization: Take first 150 chars, add "..." and a tag
-                // If text is already short, just return a slightly condensed version
+                let processed = text.trim();
+                
+                // 1. Remove common "filler" conversational starts
+                const fillers = [
+                    /^i (think|believe|suggest) (we should|that) /i,
+                    /^maybe (we can|we should|it would be good to) /i,
+                    /^how about /i,
+                    /^i want to /i,
+                    /^we need to /i
+                ];
+                
+                fillers.forEach(regex => {
+                    processed = processed.replace(regex, "");
+                });
+
+                // 2. Professional Mapping (Simulated Semantic Understanding)
+                const professionalMapping = [
+                    { keywords: ["make", "create", "build"], replacement: "Develop" },
+                    { keywords: ["help", "support"], replacement: "Facilitate" },
+                    { keywords: ["share", "give"], replacement: "Distribute" },
+                    { keywords: ["talk", "chat"], replacement: "Communicate" },
+                    { keywords: ["idea", "thought"], replacement: "Concept" },
+                    { keywords: ["notes", "study"], replacement: "Academic Resources" }
+                ];
+
+                // Capitalize first letter
+                processed = processed.charAt(0).toUpperCase() + processed.slice(1);
+
+                // 3. Summarization Logic
                 let summary;
-                if (text.length > 100) {
-                    summary = text.substring(0, 80) + "... [AI Summarized]";
-                } else if (text.length > 20) {
-                    summary = text.substring(0, Math.floor(text.length * 0.7)) + "... [AI Shortened]";
+                if (processed.length > 120) {
+                    // Extract first meaningful sentence or clause
+                    const firstPart = processed.split(/[.!?]/)[0];
+                    summary = firstPart.length > 100 ? firstPart.substring(0, 100) + "..." : firstPart;
+                    
+                    // Add professional concluding context if it was very long
+                    if (!summary.endsWith(".")) summary += ".";
+                    summary = "Proposed: " + summary;
+                } else if (processed.length > 40) {
+                    summary = processed.charAt(0).toUpperCase() + processed.slice(1);
+                    if (!summary.endsWith(".")) summary += ".";
                 } else {
-                    summary = text + " [AI Processed]";
+                    summary = processed;
                 }
                 
-                // Sanitize the AI output just in case it "generated" something invalid
                 resolve(sanitizeText(summary));
-            }, 2500); // Slightly longer for the "cool animation" to be seen
+            }, 2000);
         });
     };
 
