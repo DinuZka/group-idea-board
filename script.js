@@ -54,18 +54,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         navLinks.forEach(l => l.classList.remove('active'));
 
+        let targetSection;
         if (tab === 'idea') {
             ideaSection.classList.remove('hidden');
             setTimeout(() => ideaSection.classList.add('fade-in'), 10);
             navIdea.classList.add('active');
+            targetSection = ideaSection;
         } else if (tab === 'gpa') {
             gpaSection.classList.remove('hidden');
             setTimeout(() => gpaSection.classList.add('fade-in'), 10);
             navGpa.classList.add('active');
+            targetSection = gpaSection;
         } else {
             timerSection.classList.remove('hidden');
             setTimeout(() => timerSection.classList.add('fade-in'), 10);
             navTimer.classList.add('active');
+            targetSection = timerSection;
+        }
+
+        // Move the view specifically to the target section
+        if (targetSection) {
+            targetSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
 
         // Close mobile menu after selection
